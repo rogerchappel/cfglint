@@ -1,0 +1,118 @@
+{
+  "project": "cfglint",
+  "version": "0.1.0",
+  "description": "Configuration file linter CLI for monorepos",
+  "buildPhases": [
+    {
+      "phase": 1,
+      "name": "Scaffolding",
+      "tasks": [
+        "Update package.json with CLI bin entry and scripts",
+        "Add tsconfig.json for ESM compilation",
+        "Create directory structure: src/, tests/, examples/"
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "Type Definitions",
+      "tasks": [
+        "Define Issue, ParseResult, ScanConfig, FixResult types"
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "Parser Implementation",
+      "tasks": [
+        "src/parsers/json.ts — duplicate key detection, syntax errors",
+        "src/parsers/env.ts — KEY=VALUE extraction",
+        "src/parsers/yaml.ts — js-yaml wrapper",
+        "src/parsers/toml.ts — toml wrapper",
+        "src/parsers/ini.ts — INI parser"
+      ]
+    },
+    {
+      "phase": 4,
+      "name": "Detection Rules",
+      "tasks": [
+        "src/rules/secrets.ts — entropy calculator, pattern matcher",
+        "src/rules/duplicates.ts — JSON duplicate key detector",
+        "src/rules/syntax.ts — syntax error collector",
+        "src/rules/env-refs.ts — cross-file env reference checker"
+      ]
+    },
+    {
+      "phase": 5,
+      "name": "Infrastructure",
+      "tasks": [
+        "src/scan.ts — recursive directory walker with ignore support",
+        "src/ignore.ts — gitignore-style pattern matcher",
+        "src/fix.ts — auto-fix engine for JSON issues"
+      ]
+    },
+    {
+      "phase": 6,
+      "name": "Output Formatters",
+      "tasks": [
+        "src/output/human.ts — colored terminal output",
+        "src/output/json.ts — JSON array output",
+        "src/output/sarif.ts — SARIF 2.1.0 format"
+      ]
+    },
+    {
+      "phase": 7,
+      "name": "CLI Entry Point",
+      "tasks": [
+        "src/cli.ts — commander-based CLI with scan and check commands"
+      ]
+    },
+    {
+      "phase": 8,
+      "name": "Tests and Examples",
+      "tasks": [
+        "Create example fixtures in examples/",
+        "Write unit tests in tests/",
+        "Create scripts/smoke.sh"
+      ]
+    },
+    {
+      "phase": 9,
+      "name": "Documentation",
+      "tasks": [
+        "Rewrite README.md",
+        "Create docs/TASKS.md and docs/ORCHESTRATION.md"
+      ]
+    },
+    {
+      "phase": 10,
+      "name": "Verification",
+      "tasks": [
+        "npm install",
+        "npm test",
+        "npm run check",
+        "npm run build",
+        "npm run smoke",
+        "bash scripts/validate.sh"
+      ]
+    }
+  ],
+  "dependencies": {
+    "runtime": ["picocolors", "commander", "js-yaml", "toml", "glob", "minimatch"],
+    "dev": ["typescript", "vitest", "@types/node"]
+  },
+  "verificationCommands": [
+    "npm install",
+    "npm test",
+    "npm run check",
+    "npm run build",
+    "npm run smoke",
+    "bash scripts/validate.sh"
+  ],
+  "targetCommits": {
+    "min": 30,
+    "max": 50
+  },
+  "targetTests": {
+    "min": 30,
+    "description": "~50 tests passing"
+  }
+}
