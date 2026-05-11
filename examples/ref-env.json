@@ -1,0 +1,11 @@
+{
+  "server": {
+    "port": "${PORT}",
+    "host": "$HOST_NAME",
+    "apiUrl": "${API_URL}"
+  },
+  "database": {
+    "connectionString": "$DATABASE_URL",
+    "poolSize": "${DB_POOL_SIZE}"
+  }
+}

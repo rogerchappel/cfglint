@@ -1,0 +1,14 @@
+# .cfglintignore - patterns to skip during scanning
+
+# Ignore build outputs
+dist/
+build/
+
+# Ignore lock files
+*.lock
+
+# Ignore generated files
+*.generated.json
+
+# Ignore specific config
+local-config.json

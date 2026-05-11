@@ -1,0 +1,12 @@
+{
+  "name": "trailing-comma-app",
+  "version": "2.0.0",
+  "config": {
+    "port": 8080,
+    "host": "0.0.0.0",
+  },
+  "features": [
+    "auth",
+    "logging",
+  ]
+}

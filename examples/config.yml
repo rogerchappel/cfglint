@@ -1,0 +1,13 @@
+app:
+  name: MyYamlApp
+  version: 1.0.0
+  config:
+    port: 3000
+    debug: true
+
+database:
+  host: localhost
+  port: 5432
+  name: mydb
+
+# This is a comment
