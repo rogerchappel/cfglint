@@ -21,7 +21,7 @@
     "check": "tsc --noEmit",
     "test": "vitest run",
     "smoke": "bash scripts/smoke.sh",
-    "release:check": "npm test && npm run build && npm run smoke && npm pack --dry-run"
+    "release:check": "npm run check && npm test && npm run build && npm run smoke && npm pack --dry-run"
   },
   "keywords": [
     "config",
