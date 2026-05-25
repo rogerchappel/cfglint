@@ -1,98 +1,110 @@
 # cfglint
 
-Configuration file linter that audits JSON, YAML, TOML, INI, and `.env` files for structural issues, potential secrets, duplicate values, and cross-file environment drift.
+`cfglint` is a local-first configuration linter for projects with JSON, YAML,
+TOML, INI, and `.env` files. It scans config files for syntax errors, duplicate
+JSON keys, trailing commas, stale environment references, and secret-shaped
+values before those issues reach CI or a reviewer.
 
-```
-cfglint scan .
-```
-
-## Why it exists
-
-Configuration files accumulate problems silently: API keys accidentally committed, undefined environment variables referenced in docker-compose, duplicate keys, malformed sections, and values that look suspiciously like secrets. cfglint catches these before they reach runtime or get committed.
+It is built for maintainers and agentic workflows that need deterministic,
+offline config checks without uploading project contents.
 
 ## Install
 
 ```sh
-npm install @rogerchappel/cfglint
+npm install -D @rogerchappel/cfglint
 ```
 
-## Quick start
+From a checkout:
 
-Scan a project for config issues:
+```sh
+npm install
+npm run build
+node dist/cli.js --help
+```
+
+## Quickstart
+
+Scan the current repository and print a human-readable report:
 
 ```sh
 npx cfglint scan .
 ```
 
-Check specific directories:
+Fail CI on warning-or-higher findings:
 
 ```sh
-npx cfglint scan ./config --format json --out report.json
-npx cfglint scan ./docker-compose.yml --severity warning
-npx cfglint scan . --fix --dry-run
+npx cfglint check . --severity warning
 ```
 
-## What it checks
-
-| Rule | Description | Severity |
-|------|-------------|----------|
-| `parse-error` | File cannot be parsed | error |
-| `secret-pattern` | Value matches known secret patterns | error |
-| `duplicate-key` | Duplicate keys in JSON/YAML/TOML/INI | warning |
-| `env-undefined` | Env variable referenced but not defined | warning |
-| `bad-value-type` | Value type doesn't match expected shape | info |
-
-## Output formats
+Write a JSON or SARIF report for another tool:
 
 ```sh
-# Human-readable (default)
-cfglint scan .
-
-# JSON for CI pipelines
-cfglint scan . --format json --out cfglint-report.json
-
-# SARIF for GitHub code scanning
-cfglint scan . --format sarif
+npx cfglint scan . --format json --out cfglint-report.json
+npx cfglint scan . --format sarif --out cfglint.sarif
 ```
 
-## Auto-fix
-
-Some issues (like duplicate keys in INI files) can be automatically repaired:
+Preview automatic fixes for repairable JSON issues:
 
 ```sh
-# Show what would be fixed
-cfglint scan ./config --fix --dry-run
-
-# Actually fix repairable issues
-cfglint scan ./config --fix
+npx cfglint scan examples --fix --dry-run
 ```
 
-## Ignore patterns
+## What It Checks
 
-Create a `.cfglintignore` file in any directory to skip files or paths:
+- JSON syntax errors, duplicate keys, comments, and trailing commas
+- Secret-like values such as token assignments, AWS access key IDs, and private
+  key material
+- Environment variable references that are not defined in nearby `.env` files
+- Common parser errors across YAML, TOML, INI, and env files
+- `.cfglintignore` patterns for generated or intentionally ignored config
 
-```
-# .cfglintignore
-**/test/fixtures/**
-**/*.generated.json
-```
+## Examples
 
-## Programmatic API
+The repository includes fixture configs that exercise the main rules:
 
-Import into a Node project for custom tooling:
-
-```ts
-import { scanDirectory, fixFile } from '@rogerchappel/cfglint';
-
-const result = await scanDirectory({
-  path: './config',
-  severity: 'warning',
-  ignoreNodeModules: true,
-});
-
-console.log(`Scanned ${result.filesScanned} files, found ${result.issues.length} issues`);
+```sh
+npm run build
+node dist/cli.js scan examples/clean-config.json
+node dist/cli.js scan examples/duplicate-keys.json
+node dist/cli.js scan examples/with-secrets.json --format json
 ```
 
-## Library
+## Safety Model
 
-This is a local-first library and CLI. No telemetry, no hosted service, no network calls during scans.
+- Local-first: no telemetry, no hosted API calls, and no credential lookup.
+- Read-only by default: files are only changed when `--fix` is passed.
+- `--dry-run` shows repairable changes without writing them.
+- Secret detection is pattern-based and conservative; review findings before
+  treating them as policy.
+- `cfglint` is a linter, not a replacement for dedicated secret scanning or
+  runtime access controls.
+
+## Development
+
+```sh
+npm test
+npm run check
+npm run build
+npm run smoke
+bash scripts/validate.sh
+```
+
+For release readiness:
+
+```sh
+npm run release:check
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Keep changes small, fixture-backed, and
+offline by default.
+
+## Security
+
+See [SECURITY.md](SECURITY.md). Please do not paste real secrets into public
+issues or fixtures.
+
+## License
+
+MIT
