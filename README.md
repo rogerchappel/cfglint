@@ -1,103 +1,109 @@
 # cfglint
 
-Configuration file linter for local-first repos. Point `cfglint` at a directory and it scans JSON, YAML, INI, TOML, and `.env` files for syntax errors, trailing commas, duplicate keys, hardcoded secrets, and suspicious environment variable references.
+`cfglint` is a local-first configuration linter for projects with JSON, YAML,
+TOML, INI, and `.env` files. It scans config files for syntax errors, duplicate
+JSON keys, trailing commas, stale environment references, and secret-shaped
+values before those issues reach CI or a reviewer.
 
-It can auto-fix repairable issues, output structured reports (JSON/SARIF), and is designed for CI pre-flight checks and developer tooling audits.
-
-- **Local-first** — no network calls, no telemetry
-- **Multi-format** — JSON, YAML, INI, TOML, `.env`
-- **Auto-fix** — `--fix` repairs syntax-level issues in place
-- **CI-ready** — `check` command exits non-zero on any finding; SARIF output for GitHub
+It is built for maintainers and agentic workflows that need deterministic,
+offline config checks without uploading project contents.
 
 ## Install
 
 ```sh
-npm install -g cfglint
-# or from a checkout:
+npm install -D @rogerchappel/cfglint
+```
+
+From a checkout:
+
+```sh
 npm install
 npm run build
-npm link
+node dist/cli.js --help
 ```
 
-## Quick start
+## Quickstart
+
+Scan the current repository and print a human-readable report:
 
 ```sh
-# Scan a directory and print findings
-cfglint scan ./config
-
-# Same scan, but exit non-zero on any issue (CI gate)
-cfglint check ./config
-
-# Auto-fix repairable issues (dry run first)
-cfglint scan ./config --fix --dry-run
-cfglint scan ./config --fix
-
-# JSON output for downstream tooling
-cfglint scan ./config --format json --out report.json
-
-# SARIF output for GitHub code scanning
-cfglint scan ./config --format sarif --out results.sarif
+npx cfglint scan .
 ```
 
-## What cfglint checks
-
-### Syntax rules
-- JSON syntax errors and **trailing commas** (common in hand-edited config)
-- YAML parse failures
-- TOML and INI syntax validation
-
-### Structural rules
-- **Duplicate keys** within the same config scope
-- Missing or malformed nested objects
-
-### Security rules
-- **Hardcoded secrets**: AWS keys, API tokens, private key fragments
-- High-entropy string detection (possible leaked credentials)
-- Suspicious `.env` reference patterns (`process.env.X` where `X` looks sensitive)
-
-## Severity levels
-
-| Level    | Meaning                                     |
-|:---------|:--------------------------------------------|
-| `fatal`  | Unparseable file; no further analysis       |
-| `error`  | Definite issue (syntax, duplicate, secret)  |
-| `warning`| Suspicious pattern, needs human review      |
-| `info`   | Low-signal observation                      |
-
-Filter with `--severity warning` to suppress info-level noise.
-
-## Output formats
-
-- **human** (default): readable terminal output with per-file summaries
-- **json**: machine-readable array of issue objects
-- **sarif**: SARIF 2.1.0 for GitHub Advanced Security integration
+Fail CI on warning-or-higher findings:
 
 ```sh
-cfglint scan . --format json | jq '.[] | select(.severity == "error")'
+npx cfglint check . --severity warning
 ```
 
-## Auto-fix
-
-`cfglint scan --fix` applies in-place repairs for fixable issues:
-- Remove trailing commas in JSON
-- Fix malformed JSON syntax where recoverable
-- Other structural corrections flagged as `fixable: true`
-
-Always run `--dry-run` first to preview changes.
-
-## Verification
+Write a JSON or SARIF report for another tool:
 
 ```sh
-npm test          # 76 tests across 14 test files
-npm run check     # TypeScript type check
-npm run build     # Compile TypeScript
-npm run smoke     # 10 fixture-backed smoke tests
-npm run release:check  # Full pre-release gate
+npx cfglint scan . --format json --out cfglint-report.json
+npx cfglint scan . --format sarif --out cfglint.sarif
 ```
 
-## Safety
+Preview automatic fixes for repairable JSON issues:
 
-cfglint reads files and writes reports. `--fix` modifies files in place (always use `--dry-run` first). It does not make network calls, execute config values, install dependencies, or collect telemetry.
+```sh
+npx cfglint scan examples --fix --dry-run
+```
+
+## What It Checks
+
+- JSON syntax errors, duplicate keys, comments, and trailing commas
+- Secret-like values such as token assignments, AWS access key IDs, and private
+  key material
+- Environment variable references that are not defined in nearby `.env` files
+- Common parser errors across YAML, TOML, INI, and env files
+- `.cfglintignore` patterns for generated or intentionally ignored config
+
+## Examples
+
+The repository includes fixture configs that exercise the main rules:
+
+```sh
+npm run build
+node dist/cli.js scan examples/clean-config.json
+node dist/cli.js scan examples/duplicate-keys.json
+node dist/cli.js scan examples/with-secrets.json --format json
+```
+
+## Safety Model
+
+- Local-first: no telemetry, no hosted API calls, and no credential lookup.
+- Read-only by default: files are only changed when `--fix` is passed.
+- `--dry-run` shows repairable changes without writing them.
+- Secret detection is pattern-based and conservative; review findings before
+  treating them as policy.
+- `cfglint` is a linter, not a replacement for dedicated secret scanning or
+  runtime access controls.
+
+## Development
+
+```sh
+npm test
+npm run check
+npm run build
+npm run smoke
+bash scripts/validate.sh
+```
+
+For release readiness:
+
+```sh
+npm run release:check
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Keep changes small, fixture-backed, and
+offline by default.
+
+## Security
+
+See [SECURITY.md](SECURITY.md). Please do not paste real secrets into public
+issues or fixtures.
 
 ## License
 
