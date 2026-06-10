@@ -22,7 +22,7 @@
   "scripts": {
     "build": "tsc",
     "check": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "npm run build && vitest run",
     "smoke": "bash scripts/smoke.sh",
     "release:check": "npm test && npm run build && npm run smoke && npm pack --dry-run",
     "package:smoke": "npm pack --dry-run"
