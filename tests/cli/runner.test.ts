@@ -18,6 +18,7 @@ describe('cfglint CLI', () => {
   it('should produce JSON output', () => {
     const out = execFileSync(process.execPath, [cli, 'scan', 'fixtures', '--format', 'json'], { encoding: 'utf8' });
     const parsed = JSON.parse(out);
-    expect(Array.isArray(parsed)).toBe(true);
+    expect(parsed).toHaveProperty('filesScanned');
+    expect(Array.isArray(parsed.issues)).toBe(true);
   });
 });
