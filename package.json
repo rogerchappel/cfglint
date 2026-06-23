@@ -24,7 +24,7 @@
     "check": "tsc --noEmit",
     "test": "npm run build && vitest run",
     "smoke": "bash scripts/smoke.sh",
-    "release:check": "npm test && npm run build && npm run smoke && npm pack --dry-run",
+    "release:check": "npm run check && npm test && npm run build && npm run smoke && npm pack --dry-run",
     "package:smoke": "npm pack --dry-run"
   },
   "keywords": [
