@@ -35,6 +35,16 @@ The smoke command currently expands to:
 ```sh
 bash scripts/smoke.sh
 ```
+
+Run a smaller walkthrough that writes reusable demo reports:
+
+```sh
+bash demo/run-config-lint-demo.sh
+```
+
+The demo writes clean and secret-fixture reports under `tmp/config-lint-demo/`
+and checks the expected output markers. A short video outline and social hooks
+live in [`docs/promo/config-lint-demo-brief.md`](docs/promo/config-lint-demo-brief.md).
 ## Verification
 
 ```sh
